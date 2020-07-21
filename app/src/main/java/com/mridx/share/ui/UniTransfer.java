@@ -1,6 +1,7 @@
 package com.mridx.share.ui;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -13,7 +14,9 @@ import com.mridx.share.misc.ClientThread;
 import com.mridx.share.misc.ServerThread;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 
 public class UniTransfer extends AppCompatActivity {
 
@@ -44,6 +47,7 @@ public class UniTransfer extends AppCompatActivity {
             thread.start();
             Toast.makeText(this, "Sender Thread Started", Toast.LENGTH_SHORT).show();
         }
+
 
     }
 

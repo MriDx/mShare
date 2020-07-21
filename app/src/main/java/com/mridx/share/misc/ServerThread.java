@@ -12,7 +12,9 @@ import androidx.core.content.ContentResolverCompat;
 import com.mridx.share.ui.Send;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -54,7 +56,7 @@ public class ServerThread implements Runnable {
     public void run() {
         try {
             if (serverIp.equalsIgnoreCase("0")) {
-                serverSocket = new ServerSocket(serverPort+1);
+                serverSocket = new ServerSocket(serverPort + 1);
             } else {
                 serverSocket = new ServerSocket(serverPort);
             }
@@ -86,14 +88,52 @@ public class ServerThread implements Runnable {
     private void startCheckingForReceiveFile(Socket client) {
 
         try {
-            if (client.getInputStream() != null) {
+
+            BufferedInputStream bis = new BufferedInputStream(client.getInputStream());
+            DataInputStream dis = new DataInputStream(bis);
+
+            int filesCount = dis.readInt();
+            File[] files = new File[filesCount];
+            Log.d(TAG, "startCheckingForReceiveFile: started " + new Date().getTime());
+            for (int i = 0; i < filesCount; i++) {
+                long fileLength = dis.readLong();
+                String filePath = dis.readUTF().replace("./", "/");
+
+                String fileName = dis.readUTF();
+
+                File x = new File(Environment.getExternalStorageDirectory() + "/mridx1", filePath);
+                //File di = new File(x.getParent());
+                if (!x.exists()) {
+                    /*if (x.isDirectory()) {
+                        x.mkdirs();
+                    }*/
+                    x.mkdirs();
+                }
+
+
+                files[i] = new File(x.getAbsolutePath(), fileName);
+
+                FileOutputStream fos = new FileOutputStream(files[i]);
+                BufferedOutputStream bos = new BufferedOutputStream(fos);
+
+                for (int j = 0; j < fileLength; j++)
+                    bos.write(bis.read());
+
+                bos.close();
+                Log.d(TAG, "startCheckingForReceiveFile: Download complete" + fileName);
+            }
+
+            dis.close();
+            Log.d(TAG, "startCheckingForReceiveFile: end " + new Date().getTime());
+
+            /*if (client.getInputStream() != null) {
                 File file = new File(Environment.getExternalStorageDirectory(), new Date().getTime() + (serverIp.equalsIgnoreCase("0") ? ".apk" : ".mp4"));
                 if (!file.exists()) {
                     file.createNewFile();
                 }
                 copyFile(client.getInputStream(), new FileOutputStream(file));
                 Log.d(TAG, "startCheckingForReceiveFile: File downloaded");
-            }
+            }*/
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -145,7 +185,7 @@ public class ServerThread implements Runnable {
                 out.write(buf, 0, len);
             }
             out.close();
-            inputStream.close();
+            //inputStream.close();
         } catch (IOException e) {
             Log.d("kaku", e.toString());
             return false;

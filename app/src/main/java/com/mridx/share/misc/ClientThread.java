@@ -10,9 +10,13 @@ import android.widget.Toast;
 
 import com.mridx.share.ui.Receive;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -134,15 +138,20 @@ public class ClientThread implements Runnable {
         public void run() {
             try {
                 File file;
-                if (ip.equalsIgnoreCase("0")) {
+                /*if (ip.equalsIgnoreCase("0")) {
                     file = new File(Environment.getExternalStorageDirectory(), "file.mp4");
                 } else {
                     file = new File(Environment.getExternalStorageDirectory(), "app-release.apk");
-                }
+                    //send files
+                    sendFiles(socket);
+                }*/
+
+                sendFiles(socket);
+
                 ContentResolver contentResolver = context.getContentResolver();
-                InputStream inputStream = contentResolver.openInputStream(Uri.fromFile(file));
+                //InputStream inputStream = contentResolver.openInputStream(Uri.fromFile(file));
                 OutputStream outputStream = socket.getOutputStream();
-                copyFile(inputStream, outputStream);
+                //copyFile(inputStream, outputStream);
                 //socket.close();
 
             } catch (FileNotFoundException e) {
@@ -158,6 +167,43 @@ public class ClientThread implements Runnable {
                 }
             }
 
+        }
+    }
+
+    public static void sendFiles(Socket socket) {
+        try {
+            File file1 = new File(Environment.getExternalStorageDirectory(), "mridx1");
+            File[] files = file1.listFiles();
+
+            BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+            DataOutputStream dos = new DataOutputStream(bos);
+
+            dos.writeInt(files.length);
+
+            for(File file : files)
+            {
+                long length = file.length();
+                dos.writeLong(length);
+
+                String name = file.getName();
+                dos.writeUTF(name);
+
+                FileInputStream fis = new FileInputStream(file);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+
+                int theByte = 0;
+                while((theByte = bis.read()) != -1) bos.write(theByte);
+
+                bis.close();
+            }
+
+            dos.close();
+
+
+        } catch (FileNotFoundException e) {
+            System.out.println(e);
+        } catch (IOException e) {
+            System.out.println(" IOEXception "+ e);
         }
     }
 }
