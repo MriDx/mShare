@@ -10,10 +10,10 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/videoSearchBar"
+            android:id="@+id/videoSearchBox"
             android:layout_width="match_parent"
             android:layout_height="@dimen/searchBoxHeight"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:background="@color/white"
             android:drawableStart="@drawable/ic_search"
             android:drawablePadding="10dp"
@@ -30,12 +30,13 @@
             android:id="@+id/videoHolder"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_margin="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/videoSearchBar"
-            tools:listitem="@layout/video_view" />
+            app:layout_constraintTop_toBottomOf="@+id/videoSearchBox"
+            tools:listitem="@layout/video_view"
+            android:layout_marginTop="10dp"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

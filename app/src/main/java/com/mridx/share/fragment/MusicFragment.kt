@@ -6,16 +6,20 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mridx.share.R
 import com.mridx.share.adapter.AudioAdapter
 import com.mridx.share.data.MusicData
+import kotlinx.android.synthetic.main.music_fragment.*
 import java.text.DecimalFormat
 
 
@@ -24,21 +28,41 @@ class MusicFragment : Fragment() {
     val MB = (1024 * 1024).toDouble()
     val KB = 1024.toDouble()
     val df = DecimalFormat("#.##")
+    lateinit var audioAdapter: AudioAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         val view = inflater.inflate(R.layout.music_fragment, container, false)
         val musicHolder: RecyclerView = view.findViewById(R.id.musicHolder)
+        audioAdapter = AudioAdapter()
         musicHolder.apply {
             setHasFixedSize(true)
-            adapter = AudioAdapter(getAllAudio(context))
+            adapter = audioAdapter
             layoutManager = LinearLayoutManager(context)
         }
+        audioAdapter.setMusicList(getAllAudio(container!!.context))
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        audioSearchBox.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                audioAdapter.filter.filter(p0)
+            }
+        })
+    }
+
+
     @SuppressLint("Recycle")
-    private fun getAllAudio(context: Context): List<MusicData> {
+    private fun getAllAudio(context: Context): ArrayList<MusicData> {
         val audioList = ArrayList<MusicData>()
         val contentResolver = context.contentResolver
         val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI

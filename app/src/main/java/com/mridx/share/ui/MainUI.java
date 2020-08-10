@@ -66,11 +66,11 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
         setContentView(R.layout.main_ui);
 
 
-        if (getIntent().getExtras() == null)
-            //finish();
-            // userType = (USER_TYPE) getIntent().getExtras().get("TYPE");
+        //if (getIntent().getExtras() == null)
+        //finish();
+        // userType = (USER_TYPE) getIntent().getExtras().get("TYPE");
 
-            viewPager = findViewById(R.id.viewPager);
+        viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
         viewPager.setOffscreenPageLimit(5);
 

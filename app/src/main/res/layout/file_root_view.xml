@@ -11,7 +11,7 @@
         android:id="@+id/fileSearchBar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/searchBoxHeight"
-        android:layout_margin="@dimen/layoutMargin"
+        android:layout_margin="10dp"
         android:background="@color/white"
         android:drawableStart="@drawable/ic_search"
         android:drawablePadding="10dp"
@@ -28,7 +28,6 @@
         android:id="@+id/storageHolder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -36,7 +35,9 @@
         app:layout_constraintTop_toBottomOf="@+id/fileSearchBar"
         app:layout_constraintVertical_bias="0"
         tools:itemCount="2"
-        tools:listitem="@layout/storage_view" />
+        tools:listitem="@layout/storage_view"
+
+        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

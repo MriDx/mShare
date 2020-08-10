@@ -31,7 +31,6 @@ public class FileFragment extends Fragment implements MainUI.OnItemClickedListen
         View view = inflater.inflate(R.layout.files_fragment, container, false);
 
         if (savedInstanceState == null) {
-
             FileRootFragment fileRootFragment = new FileRootFragment();
             fileRootFragment.setOnRootItemClicked(this);
 

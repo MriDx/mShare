@@ -55,7 +55,9 @@
 
         <activity android:name=".ui.SenderClient" />
         <activity android:name=".ui.SenderHost" />
-        <activity android:name=".ui.MainUI" />
+        <activity android:name=".ui.MainUI"
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            />
         <activity android:name=".ui.JoinUI" />
         <activity android:name=".ui.CreateUI" />
 

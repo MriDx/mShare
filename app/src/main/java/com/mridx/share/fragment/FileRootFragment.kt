@@ -9,6 +9,9 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.OrientationHelper.VERTICAL
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.mridx.share.R
 import com.mridx.share.adapter.StorageAdapter
 import com.mridx.share.data.StorageData
@@ -34,7 +37,7 @@ class FileRootFragment : Fragment(), (StorageData) -> Unit {
     var onRootItemClicked: ((StorageData) -> Unit?)? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.file_root_view, container, false);
+        return inflater.inflate(R.layout.file_root_view, null, false);
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -43,9 +46,12 @@ class FileRootFragment : Fragment(), (StorageData) -> Unit {
         //fileRootView.visibility = View.VISIBLE
 
         storageAdapter = StorageAdapter()
+        val lm = LinearLayoutManager(view.context)
+        lm.orientation = LinearLayoutManager.VERTICAL
+
         storageAdapter.onStorageClicked = this
         storageHolder.apply {
-            layoutManager = LinearLayoutManager(view.context)
+            layoutManager = lm
             adapter = storageAdapter
         }
         //getData(StorageUtil.getStorageList())

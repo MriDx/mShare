@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.mridx.share.R
 import com.mridx.share.data.StorageData
@@ -39,7 +41,6 @@ class StorageAdapter : RecyclerView.Adapter<StorageAdapter.ViewHolder>() {
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
         @SuppressLint("SetTextI18n")
         fun bind(storageData: StorageData) {
             itemView.storageNameView.text = storageData.name
@@ -56,4 +57,5 @@ class StorageAdapter : RecyclerView.Adapter<StorageAdapter.ViewHolder>() {
             itemView.setOnClickListener { onStorageClicked?.invoke(storageData) }
         }
     }
+
 }

@@ -11,10 +11,10 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/audio_searchBar"
+            android:id="@+id/audioSearchBox"
             android:layout_width="match_parent"
             android:layout_height="@dimen/searchBoxHeight"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:background="@color/white"
             android:drawableStart="@drawable/ic_search"
             android:drawablePadding="10dp"
@@ -35,7 +35,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/audio_searchBar"
+            app:layout_constraintTop_toBottomOf="@+id/audioSearchBox"
             tools:itemCount="15"
             tools:listitem="@layout/music_view" />
 
