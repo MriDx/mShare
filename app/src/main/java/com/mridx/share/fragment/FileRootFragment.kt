@@ -16,10 +16,16 @@ import com.mridx.share.utils.StorageUtil
 import kotlinx.android.synthetic.main.file_root_view.*
 import kotlinx.android.synthetic.main.files_fragment.*
 import java.io.File
+import java.text.DecimalFormat
 
 class FileRootFragment : Fragment(), (StorageData) -> Unit {
 
     lateinit var storageAdapter: StorageAdapter
+
+    val MB = (1024 * 1024).toDouble()
+    val GB = (1024 * 1024 * 1024).toDouble()
+    val KB = 1024.toDouble()
+    val df = DecimalFormat("#.##")
 
     enum class ROOT_TYPE {
         SD, IN
@@ -51,8 +57,8 @@ class FileRootFragment : Fragment(), (StorageData) -> Unit {
         val storageDataList: ArrayList<StorageData> = ArrayList()
         for (storageInfo: StorageUtil.StorageInfo in storageList) {
             val file = File(storageInfo.path.replace("/mnt/media_rw/", "/storage/"))
-            val size = (StatFs(file.absolutePath).availableBytes / (1024 * 1024 * 1024)).toDouble()
-            val total = (StatFs(file.absolutePath).totalBytes / (1024 * 1024 * 1024)).toDouble()
+            val size = (StatFs(file.absolutePath).availableBytes / GB)
+            val total = (StatFs(file.absolutePath).totalBytes / GB)
 
             storageDataList.add(StorageData(storageInfo.displayName, storageInfo.path, size, total))
         }
