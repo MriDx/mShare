@@ -8,11 +8,13 @@ import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.mridx.share.R
 import com.mridx.share.data.MusicData
 import com.mridx.share.data.VideoData
+import kotlinx.android.synthetic.main.video_view.view.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -20,6 +22,9 @@ class VideoAdapter : RecyclerView.Adapter<VideoAdapter.ViewHolder>(), Filterable
 
     private var videoList : ArrayList<VideoData> = ArrayList()
     private var videoListFiltered : ArrayList<VideoData> = ArrayList()
+    private var videoListSelected : ArrayList<VideoData> = ArrayList()
+
+    var onSelected : ((ArrayList<VideoData>) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.video_view, parent, false)
@@ -38,17 +43,24 @@ class VideoAdapter : RecyclerView.Adapter<VideoAdapter.ViewHolder>(), Filterable
         notifyDataSetChanged()
     }
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val title: TextView = itemView.findViewById(R.id.videoName)
         private val size: TextView = itemView.findViewById(R.id.videoSize)
         private val thumb: ImageView = itemView.findViewById(R.id.videoThumb)
+        private val checkView: ConstraintLayout = itemView.findViewById(R.id.checkView)
 
-        fun bind(videolist: VideoData) {
-            title.text = videolist.title
-            size.text = videolist.videoSize
+        fun bind(videoData: VideoData) {
+            title.text = videoData.title
+            size.text = videoData.videoSize
 
-            val filePath = videolist.thumbnail
+            val filePath = videoData.thumbnail
             Log.d("nihal1", filePath)
+
+            if (videoData.selected) {
+                checkView.videoCheckBox.setImageResource(R.drawable.ic_selected)
+            } else{
+                checkView.videoCheckBox.setImageResource(R.drawable.custom_checkbox)
+            }
 
             Glide.with(itemView.context)
                     .asBitmap()
@@ -56,7 +68,20 @@ class VideoAdapter : RecyclerView.Adapter<VideoAdapter.ViewHolder>(), Filterable
                     .placeholder(R.drawable.ic_video)
                     .load(filePath)
                     .into(thumb)
+            checkView.setOnClickListener { kotlin.run {
+                videoData.selected = !videoData.selected
+                notifyDataSetChanged()
+                addToSelected()
+            } }
         }
+    }
+
+    private fun addToSelected() {
+        videoListSelected.clear()
+        for (v in videoListFiltered) {
+            if (v.selected) videoListSelected.add(v)
+        }
+        onSelected?.invoke(videoListSelected)
     }
 
     override fun getFilter(): Filter {
@@ -66,7 +91,7 @@ class VideoAdapter : RecyclerView.Adapter<VideoAdapter.ViewHolder>(), Filterable
                 if (query.isEmpty())
                     videoListFiltered = videoList
                 else {
-                    var resultList: ArrayList<VideoData> = ArrayList()
+                    val resultList: ArrayList<VideoData> = ArrayList()
                     for (video in videoList) {
                         if (video.title.toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))
                         resultList.add(video)

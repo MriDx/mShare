@@ -28,7 +28,7 @@
         android:text="Video Name"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/videoCheckBox"
+        app:layout_constraintEnd_toStartOf="@+id/checkView"
         app:layout_constraintStart_toEndOf="@+id/videoThumb"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
@@ -44,20 +44,35 @@
         android:layout_marginTop="5dp"
         android:text="5.8 MB"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/videoCheckBox"
+        app:layout_constraintEnd_toStartOf="@+id/checkView"
         app:layout_constraintStart_toEndOf="@+id/videoThumb"
         app:layout_constraintTop_toBottomOf="@+id/videoName"
         app:layout_constraintVertical_bias="0.0" />
 
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/videoCheckBox"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:button="@drawable/custom_checkbox"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/checkView"
+        android:layout_width="40dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/videoThumb"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toEndOf="@+id/videoThumb"
-        app:layout_constraintTop_toTopOf="@+id/videoThumb" />
+        app:layout_constraintTop_toTopOf="@+id/videoThumb">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/videoCheckBox"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:padding="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.2"
+            app:srcCompat="@drawable/custom_checkbox"
+            app:tint="@color/colorAccent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

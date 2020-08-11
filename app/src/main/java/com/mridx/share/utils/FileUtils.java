@@ -8,11 +8,17 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.net.FileNameMap;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class FileUtils {
+
+    public static double GB = (1024 * 1024 * 1024);
+    public static double MB = (1024 * 1024);
+    public static double KB = 1024;
+    public static DecimalFormat df = new DecimalFormat("#.##");
 
 
     public static List<File> getFilesFromPath(String path, boolean showHidden, boolean onlyFolder) {
@@ -62,7 +68,7 @@ public class FileUtils {
     }
 
     private static Double getFileSize(long length) {
-        return Double.parseDouble(String.valueOf(length)) / (1024 * 1024);
+        return Double.parseDouble(String.valueOf(length));
     }
 
 }

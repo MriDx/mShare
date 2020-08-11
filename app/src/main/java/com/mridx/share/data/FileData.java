@@ -6,16 +6,16 @@ public class FileData {
 
     private String path, name, ext = " ";
     private FileType fileType;
-    private Double sizeInMB;
+    private Double size;
     private int subFiles = 0;
     private boolean selected = false;
 
-    public FileData(String path, String name, String ext, FileType fileType, Double sizeInMB, int subFiles, boolean selected) {
+    public FileData(String path, String name, String ext, FileType fileType, Double size, int subFiles, boolean selected) {
         this.path = path;
         this.name = name;
         this.ext = ext;
         this.fileType = fileType;
-        this.sizeInMB = sizeInMB;
+        this.size = size;
         this.subFiles = subFiles;
         this.selected = selected;
     }
@@ -36,8 +36,8 @@ public class FileData {
         return fileType;
     }
 
-    public Double getSizeInMB() {
-        return sizeInMB;
+    public Double getSize() {
+        return size;
     }
 
     public int getSubFiles() {

@@ -4,12 +4,14 @@ data class MusicData(
         var title: String,
         var albumArt: String,
         var audioSize: String,
-        var path : String
+        var path: String,
+        var selected: Boolean
 )
 
 data class VideoData(
         var title: String,
         var thumbnail: String,
         var videoSize: String,
-        var path : String
+        var path: String,
+        var selected: Boolean
 )

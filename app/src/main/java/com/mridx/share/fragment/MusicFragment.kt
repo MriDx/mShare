@@ -20,10 +20,12 @@ import com.mridx.share.R
 import com.mridx.share.adapter.AudioAdapter
 import com.mridx.share.data.MusicData
 import kotlinx.android.synthetic.main.music_fragment.*
+import kotlinx.android.synthetic.main.music_fragment.view.*
+import kotlinx.android.synthetic.main.share_ui.view.*
 import java.text.DecimalFormat
 
 
-class MusicFragment : Fragment() {
+class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit {
 
     val MB = (1024 * 1024).toDouble()
     val KB = 1024.toDouble()
@@ -35,6 +37,7 @@ class MusicFragment : Fragment() {
         val view = inflater.inflate(R.layout.music_fragment, container, false)
         val musicHolder: RecyclerView = view.findViewById(R.id.musicHolder)
         audioAdapter = AudioAdapter()
+        audioAdapter.onSelected = this
         musicHolder.apply {
             setHasFixedSize(true)
             adapter = audioAdapter
@@ -87,7 +90,7 @@ class MusicFragment : Fragment() {
 
 
                 val albumArt: String = getAlbumart(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))
-                audioList.add(MusicData(songTitle, albumArt, songSize, audioPath))
+                audioList.add(MusicData(songTitle, albumArt, songSize, audioPath, false))
             } while (cursor.moveToNext())
         }
         return audioList
@@ -104,6 +107,15 @@ class MusicFragment : Fragment() {
         return if (myValue > MB) {
             df.format(myValue / MB) + " MB"
         } else df.format(myValue / KB) + " KB"
+    }
+
+    override fun invoke(p1: ArrayList<MusicData>) {
+        if (p1.size > 0) {
+            btmView.visibility = View.VISIBLE
+            btmView.sendBtn.text = "Send ( ${p1.size} )"
+        } else {
+            btmView.visibility = View.GONE
+        }
     }
 }
 

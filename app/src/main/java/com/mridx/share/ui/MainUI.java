@@ -14,6 +14,7 @@ import com.mridx.share.R;
 import com.mridx.share.adapter.FilesListAdapter;
 import com.mridx.share.adapter.ViewPagerAdapter;
 import com.mridx.share.data.FileData;
+import com.mridx.share.data.MusicData;
 import com.mridx.share.fragment.AppFragment;
 import com.mridx.share.fragment.FileFragment;
 import com.mridx.share.fragment.FilesListFragment;
@@ -22,6 +23,8 @@ import com.mridx.share.fragment.PhotoFragment;
 import com.mridx.share.fragment.VideoFragment;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
@@ -32,6 +35,7 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
     private TabLayout tabLayout;
     private ViewPagerAdapter viewPagerAdapter;
 
+    public static ArrayList<MusicData> selectedMusicList = new ArrayList<>();
 
     OnItemClickedListener onItemClickedListener;
 

@@ -16,10 +16,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.mridx.share.R
 import com.mridx.share.adapter.VideoAdapter
 import com.mridx.share.data.VideoData
+import kotlinx.android.synthetic.main.music_fragment.*
+import kotlinx.android.synthetic.main.music_fragment.view.*
 import kotlinx.android.synthetic.main.video_fragment.*
+import kotlinx.android.synthetic.main.video_fragment.btmView
 import java.text.DecimalFormat
 
-class VideoFragment : Fragment() {
+class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit {
 
     val GB = (1024 * 1024 * 1024).toDouble()
     val MB = (1024 * 1024).toDouble()
@@ -32,6 +35,7 @@ class VideoFragment : Fragment() {
         val view = inflater.inflate(R.layout.video_fragment, container, false)
         val videoHolder: RecyclerView = view.findViewById(R.id.videoHolder)
         videoAdapter = VideoAdapter()
+        videoAdapter.onSelected = this
         videoHolder.apply {
             setHasFixedSize(true)
             adapter = videoAdapter
@@ -86,7 +90,7 @@ class VideoFragment : Fragment() {
                 val size = cursor.getColumnIndex(MediaStore.Video.Media.SIZE)
                 val videoSize = getVideoSize(cursor.getString(size))
 
-                videoList.add(VideoData(videoTitle, videoPath, videoSize ?: "0", videoPath))
+                videoList.add(VideoData(videoTitle, videoPath, videoSize ?: "0", videoPath, false))
 
             } while (cursor.moveToNext())
         }
@@ -103,6 +107,15 @@ class VideoFragment : Fragment() {
                 df.format(myValue / MB) + " MB"
             }
             else -> df.format(myValue / KB) + " KB"
+        }
+    }
+
+    override fun invoke(p1: ArrayList<VideoData>) {
+        if (p1.size > 0) {
+            btmView.visibility = View.VISIBLE
+            btmView.sendBtn.text = "Send ( ${p1.size} )"
+        } else {
+            btmView.visibility = View.GONE
         }
     }
 }

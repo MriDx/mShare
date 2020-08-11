@@ -19,9 +19,14 @@ import com.mridx.share.data.FileData;
 import com.mridx.share.fragment.FilesListFragment;
 import com.mridx.share.ui.MainUI;
 import com.mridx.share.utils.FileType;
+import com.mridx.share.utils.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import static com.mridx.share.utils.FileUtils.GB;
+import static com.mridx.share.utils.FileUtils.KB;
+import static com.mridx.share.utils.FileUtils.MB;
 
 public class FilesListAdapter extends RecyclerView.Adapter<FilesListAdapter.ViewHolder> {
 
@@ -81,7 +86,7 @@ public class FilesListAdapter extends RecyclerView.Adapter<FilesListAdapter.View
             } else {
                 folderView.setVisibility(View.GONE);
                 sizeView.setVisibility(View.VISIBLE);
-                sizeView.setText(String.format("%.1f", fileData.getSizeInMB()) + "MB");
+                sizeView.setText(getSize(fileData.getSize()));
                 int res = getIcon(fileData.getExt());
                 //fileIconView.setImageResource(res);
                 Glide.with(itemView.getContext()).asBitmap().load(new File(fileData.getPath())).placeholder(res).into(fileIconView);
@@ -95,6 +100,14 @@ public class FilesListAdapter extends RecyclerView.Adapter<FilesListAdapter.View
             itemView.setOnClickListener(view -> onAdapterItemClicked.onClicked(fileData));
 
         }
+    }
+
+    private String getSize(double length) {
+        if (length > GB)
+            return FileUtils.df.format(length / GB) + " GB";
+        else if (length > MB)
+            return FileUtils.df.format(length / MB) + " MB";
+        return FileUtils.df.format(length / KB) + " KB";
     }
 
     private int getIcon(String ext) {
