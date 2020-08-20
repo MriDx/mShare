@@ -22,7 +22,7 @@ import kotlinx.android.synthetic.main.video_fragment.*
 import kotlinx.android.synthetic.main.video_fragment.btmView
 import java.text.DecimalFormat
 
-class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit {
+class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit, (Boolean, ArrayList<VideoData>) -> Unit {
 
     val GB = (1024 * 1024 * 1024).toDouble()
     val MB = (1024 * 1024).toDouble()
@@ -35,14 +35,21 @@ class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit {
         val view = inflater.inflate(R.layout.video_fragment, container, false)
         val videoHolder: RecyclerView = view.findViewById(R.id.videoHolder)
         videoAdapter = VideoAdapter()
+        getVideos(container!!.context)
         videoAdapter.onSelected = this
         videoHolder.apply {
             setHasFixedSize(true)
             adapter = videoAdapter
             layoutManager = LinearLayoutManager(context)
         }
-        videoAdapter.setVideoList(getAllVideo(view.context))
+        //videoAdapter.setVideoList(getAllVideo(view.context))
         return view
+    }
+
+    private fun getVideos(context: Context) {
+        val getAll: GetAll = GetAll(context)
+        getAll.onComplete = this
+        getAll.start()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -117,5 +124,19 @@ class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit {
         } else {
             btmView.visibility = View.GONE
         }
+    }
+
+    inner class GetAll(val context: Context) : Thread() {
+        var onComplete: ((Boolean, ArrayList<VideoData>) -> Unit)? = null
+        override fun run() {
+            super.run()
+            val list: ArrayList<VideoData> = getAllVideo(context)
+            onComplete?.invoke(true, list)
+        }
+    }
+
+    override fun invoke(p1: Boolean, p2: ArrayList<VideoData>) {
+        videoAdapter.setVideoList(p2)
+        //progressBar?.visibility = View.GONE
     }
 }

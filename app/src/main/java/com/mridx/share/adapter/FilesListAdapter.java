@@ -83,6 +83,7 @@ public class FilesListAdapter extends RecyclerView.Adapter<FilesListAdapter.View
                 folderView.setVisibility(View.VISIBLE);
                 sizeView.setVisibility(View.GONE);
                 folderView.setText(fileData.getSubFiles() + " files");
+                fileIconView.setImageResource(R.drawable.ic_folder);
             } else {
                 folderView.setVisibility(View.GONE);
                 sizeView.setVisibility(View.VISIBLE);

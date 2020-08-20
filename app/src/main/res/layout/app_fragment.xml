@@ -69,18 +69,29 @@
             tools:itemCount="30"
             tools:listitem="@layout/app_view" />
 
+        <com.google.android.material.progressindicator.ProgressIndicator
+            android:id="@+id/progressBar"
+            style="@style/Widget.MaterialComponents.ProgressIndicator.Circular.Indeterminate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:layout_constraintBottom_toTopOf="@+id/btmView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cardView" />
+
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btmView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/white"
+            app:cardElevation="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1"
-            app:cardElevation="5dp"
-            app:cardBackgroundColor="@color/white"
-            android:id="@+id/btmView"
-            >
+            app:layout_constraintVertical_bias="1">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -92,6 +103,7 @@
                 app:layout_constraintVertical_bias="1">
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/appSendBtn"
                     android:layout_width="150dp"
                     android:layout_height="56dp"
                     android:layout_margin="0dp"
@@ -101,9 +113,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0"
-                    android:id="@+id/appSendBtn"
-                    />
+                    app:layout_constraintVertical_bias="0" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 

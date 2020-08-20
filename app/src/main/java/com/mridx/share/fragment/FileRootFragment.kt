@@ -1,5 +1,6 @@
 package com.mridx.share.fragment
 
+import android.content.Context
 import android.os.Bundle
 import android.os.StatFs
 import android.util.Log
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import com.mridx.share.R
 import com.mridx.share.adapter.StorageAdapter
+import com.mridx.share.data.FileData
 import com.mridx.share.data.StorageData
 import com.mridx.share.utils.StorageUtil
 import kotlinx.android.synthetic.main.file_root_view.*
@@ -21,7 +23,7 @@ import kotlinx.android.synthetic.main.files_fragment.*
 import java.io.File
 import java.text.DecimalFormat
 
-class FileRootFragment : Fragment(), (StorageData) -> Unit {
+class FileRootFragment : Fragment(), (StorageData) -> Unit, (Boolean, ArrayList<StorageData>) -> Unit {
 
     lateinit var storageAdapter: StorageAdapter
 
@@ -46,6 +48,7 @@ class FileRootFragment : Fragment(), (StorageData) -> Unit {
         //fileRootView.visibility = View.VISIBLE
 
         storageAdapter = StorageAdapter()
+        getRoot(view.context)
         val lm = LinearLayoutManager(view.context)
         lm.orientation = LinearLayoutManager.VERTICAL
 
@@ -55,8 +58,14 @@ class FileRootFragment : Fragment(), (StorageData) -> Unit {
             adapter = storageAdapter
         }
         //getData(StorageUtil.getStorageList())
-        storageAdapter.setList(getData(StorageUtil.getStorageList()))
+        //storageAdapter.setList(getData(StorageUtil.getStorageList()))
 
+    }
+
+    private fun getRoot(context: Context) {
+        val getRoot = GetRoot(context)
+        getRoot.onComplete = this
+        getRoot.start()
     }
 
     private fun getData(storageList: List<StorageUtil.StorageInfo>): ArrayList<StorageData> {
@@ -71,12 +80,23 @@ class FileRootFragment : Fragment(), (StorageData) -> Unit {
         return storageDataList
     }
 
-    private fun setupView(storageList: ArrayList<StorageData>) {
 
-    }
 
     override fun invoke(storageData: StorageData) {
         onRootItemClicked?.invoke(storageData)
+    }
+
+    inner class GetRoot(context: Context) : Thread() {
+        var onComplete : ((Boolean, ArrayList<StorageData>) -> Unit)? = null
+        override fun run() {
+            super.run()
+            val list: ArrayList<StorageData> = getData(StorageUtil.getStorageList())
+            onComplete?.invoke(true, list)
+        }
+    }
+
+    override fun invoke(p1: Boolean, p2: ArrayList<StorageData>) {
+        storageAdapter.setList(p2)
     }
 
 

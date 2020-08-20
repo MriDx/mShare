@@ -5,6 +5,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,7 +13,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,11 +21,10 @@ import com.mridx.share.adapter.AudioAdapter
 import com.mridx.share.data.MusicData
 import kotlinx.android.synthetic.main.music_fragment.*
 import kotlinx.android.synthetic.main.music_fragment.view.*
-import kotlinx.android.synthetic.main.share_ui.view.*
 import java.text.DecimalFormat
 
 
-class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit {
+class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit, (Boolean, ArrayList<MusicData>) -> Unit {
 
     val MB = (1024 * 1024).toDouble()
     val KB = 1024.toDouble()
@@ -37,14 +36,21 @@ class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit {
         val view = inflater.inflate(R.layout.music_fragment, container, false)
         val musicHolder: RecyclerView = view.findViewById(R.id.musicHolder)
         audioAdapter = AudioAdapter()
+        getMusic(container!!.context)
         audioAdapter.onSelected = this
         musicHolder.apply {
             setHasFixedSize(true)
             adapter = audioAdapter
             layoutManager = LinearLayoutManager(context)
         }
-        audioAdapter.setMusicList(getAllAudio(container!!.context))
+        //audioAdapter.setMusicList(getAllAudio(container!!.context))
         return view
+    }
+
+    private fun getMusic(context: Context) {
+        val getAll = GetAll(context)
+        getAll.OnComplete = this
+        getAll.start()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,19 +58,16 @@ class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit {
         audioSearchBox.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
             }
-
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
             }
-
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 audioAdapter.filter.filter(p0)
             }
         })
     }
 
-
-    @SuppressLint("Recycle")
+//region not needed
+    /*@SuppressLint("Recycle")
     private fun getAllAudio(context: Context): ArrayList<MusicData> {
         val audioList = ArrayList<MusicData>()
         val contentResolver = context.contentResolver
@@ -94,7 +97,8 @@ class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit {
             } while (cursor.moveToNext())
         }
         return audioList
-    }
+    }*/
+    //endregion
 
     private fun getAlbumart(albumId: String): String {
         val albumArtUri: Uri = Uri.parse("content://media/external/audio/albumart")
@@ -116,6 +120,53 @@ class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit {
         } else {
             btmView.visibility = View.GONE
         }
+    }
+
+    inner class GetAll(private val context: Context) : Thread() {
+
+
+        var OnComplete: ((Boolean, ArrayList<MusicData>) -> Unit)? = null
+
+        override fun run() {
+            super.run()
+            val list: ArrayList<MusicData> = getMusic()
+            OnComplete?.invoke(true, list)
+        }
+
+        private fun getMusic(): java.util.ArrayList<MusicData> {
+            val audioList = ArrayList<MusicData>()
+            val contentResolver = context.contentResolver
+            val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+            val cursor = contentResolver.query(
+                    uri,
+                    null,
+                    null,
+                    null,
+                    null
+            )
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    val title = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)
+                    val songTitle = cursor.getString(title)
+
+                    val size: Int = cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)
+                    val songSize = getSongSize(cursor.getString(size))
+                    //to get the path of an audio file
+                    val audioPath = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+                    Log.d("nihal", audioPath)
+
+
+                    val albumArt: String = getAlbumart(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))
+                    audioList.add(MusicData(songTitle, albumArt, songSize, audioPath, false))
+                } while (cursor.moveToNext())
+            }
+            return audioList
+        }
+    }
+
+    override fun invoke(p1: Boolean, p2: ArrayList<MusicData>) {
+        audioAdapter.setMusicList(p2)
     }
 }
 

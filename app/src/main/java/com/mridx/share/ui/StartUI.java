@@ -85,6 +85,7 @@ public class StartUI extends AppCompatActivity {
 
     }
 
+
     public void getAllAudioFromDevice(final Context context) {
         ContentResolver contentResolver = context.getContentResolver();
 

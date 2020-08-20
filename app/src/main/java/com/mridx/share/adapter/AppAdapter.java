@@ -30,9 +30,6 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
         this.appAdapterClicked = appAdapterClicked;
     }
 
-    public AppAdapter() {
-    }
-
     @NonNull
     @Override
     public AppAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -83,6 +80,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
 
     public void setAppList(ArrayList<AppData> appList) {
         this.appList = appList;
+        notifyDataSetChanged();
     }
 
     @Override

@@ -31,6 +31,7 @@ class StorageAdapter : RecyclerView.Adapter<StorageAdapter.ViewHolder>() {
         return storageList.size
     }
 
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(storageList[position])
     }

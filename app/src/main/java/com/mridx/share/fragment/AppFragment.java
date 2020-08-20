@@ -5,12 +5,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -63,8 +60,10 @@ public class AppFragment extends Fragment {
     }
 
     private void setupView(View view) {
+
         setupAdapter();
         appsHolder = view.findViewById(R.id.appsHolder);
+        getApps();
         GridLayoutManager gridLayoutManager = new GridLayoutManager(context, 4);
         appsHolder.setAdapter(appAdapter);
         appsHolder.setLayoutManager(gridLayoutManager);
@@ -73,11 +72,23 @@ public class AppFragment extends Fragment {
         appCheckbox = view.findViewById(R.id.appCheckbox);
         appCheckbox.setOnCheckedChangeListener((compoundButton, b) -> appAdapter.setAllChecked(b));
 
-        appAdapter.setAppList(installedApps());
+        //appAdapter.setAppList(new ArrayList<>());
         appAdapter.setAppAdapterClicked(selectedList -> {
             //if (selectedList.size() > 0)
             showSendBtn(selectedList.size());
         });
+    }
+
+    private void getApps() {
+        GetApps getApps = new GetApps(context);
+        getApps.setOnComplete((b, appList) -> new Runnable() {
+            @Override
+            public void run() {
+                appAdapter.setAppList(appList);
+                appAdapter.notifyDataSetChanged();
+            }
+        });
+        getApps.start();
     }
 
     private void showSendBtn(int size) {
@@ -116,6 +127,66 @@ public class AppFragment extends Fragment {
 
         }
         return "00 KB";
+    }
+
+    static class GetApps extends Thread {
+
+        private Context context;
+        private static final long MB = 1024 * 1024;
+        private static final long KB = 1024;
+        private DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
+        public GetApps(Context context) {
+            this.context = context;
+        }
+
+        OnComplete onComplete;
+
+        interface OnComplete {
+            void onDone(boolean b, ArrayList<AppData> appList);
+        }
+
+        public void setOnComplete(OnComplete onComplete) {
+            this.onComplete = onComplete;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            ArrayList<AppData> list = getAll();
+            onComplete.onDone(true, list);
+
+        }
+
+
+        private ArrayList<AppData> getAll() {
+            ArrayList<AppData> appList = new ArrayList<>();
+            List<PackageInfo> packList = context.getPackageManager().getInstalledPackages(0);
+            for (int i = 0; i < packList.size(); i++) {
+                PackageInfo packInfo = packList.get(i);
+                if ((packInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                    String appName = packInfo.applicationInfo.loadLabel(context.getPackageManager()).toString();
+                    Drawable icon = packInfo.applicationInfo.loadIcon(context.getPackageManager());
+                    //Log.d("kaku", "installedApps: " + packInfo.applicationInfo.sourceDir);
+                    String apkPath = packInfo.applicationInfo.sourceDir;
+                    appList.add(new AppData(appName, icon, apkPath, getFileSize(apkPath), false));
+                }
+            }
+            return appList;
+        }
+
+        private String getFileSize(String apkPath) {
+            File file = new File(apkPath);
+            if (file.exists()) {
+                double fileSize = file.length();
+                if (fileSize > MB) {
+                    return decimalFormat.format(fileSize / MB) + " MB";
+                }
+                return decimalFormat.format(fileSize / KB) + " KB";
+
+            }
+            return "00 KB";
+        }
     }
 
 }
