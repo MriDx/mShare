@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
 
     private ArrayList<AppData> appList = new ArrayList<>();
-    private ArrayList<AppData> selectedAppList = new ArrayList<>();
+    public ArrayList<AppData> selectedAppList = new ArrayList<>();
 
     private int SELECTED = 0, NORMAL = 1;
 

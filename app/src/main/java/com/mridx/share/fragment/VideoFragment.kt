@@ -47,7 +47,7 @@ class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit, (Boolean, Arra
     }
 
     private fun getVideos(context: Context) {
-        val getAll: GetAll = GetAll(context)
+        val getAll = GetAll(context)
         getAll.onComplete = this
         getAll.start()
     }

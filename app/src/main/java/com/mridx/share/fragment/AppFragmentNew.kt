@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,7 +41,18 @@ class AppFragmentNew : Fragment(), (ArrayList<AppData>) -> Unit {
         appAdapter.setAppAdapterClicked { selectedList -> showSendBtn(selectedList.size) }
         val appCheckBox: MaterialCheckBox = view.findViewById(R.id.appCheckbox)
         appCheckBox.setOnCheckedChangeListener { _, b -> appAdapter.setAllChecked(b) }
+        appSendBtn.setOnClickListener { handleSendAction() }
         return view
+    }
+
+    private fun handleSendAction() {
+        val selectedList = appAdapter.selectedAppList
+        if (selectedList.size == 0) {
+            Toast.makeText(context, "Select at least one App", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+
     }
 
     private fun getApps(context: Context) {
@@ -102,3 +114,4 @@ class AppFragmentNew : Fragment(), (ArrayList<AppData>) -> Unit {
     }
 
 }
+
