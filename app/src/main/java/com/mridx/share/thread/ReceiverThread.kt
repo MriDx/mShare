@@ -11,6 +11,8 @@ class ReceiverThread(private val socket: Socket) : Thread() {
         val extStorage = Environment.getExternalStorageDirectory()
     }
 
+    var onProgress: ((String) -> Unit)? = null
+    var onComplete: (() -> Unit)? = null
 
     /**
      *
@@ -53,9 +55,11 @@ class ReceiverThread(private val socket: Socket) : Thread() {
                 bufferOutputStream.write(bufferedInputStream.read())
             }
             bufferOutputStream.close()
+            onProgress?.invoke(name)
             Log.d("kaku", "saveFiles: download complete, $name")
         }
         Log.d("kaku", "saveFiles: download complete total $totalFiles files")
+        onComplete?.invoke()
 
     }
 }

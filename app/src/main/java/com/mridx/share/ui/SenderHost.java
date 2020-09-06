@@ -116,4 +116,14 @@ public class SenderHost extends AppCompatActivity implements SenderCallback {
     public void setOnFileTransferCallback() {
 
     }
+
+    @Override
+    public void onFileSendingStart() {
+
+    }
+
+    @Override
+    public void onFileSendingProgress(String p1) {
+
+    }
 }

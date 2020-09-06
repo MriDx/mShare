@@ -1,5 +1,6 @@
 package com.mridx.share.thread
 
+import com.mridx.share.callback.ReceiverCallback
 import com.mridx.share.data.Utils
 import com.mridx.share.thread.FileReceiver.Companion.serverSocket
 import java.io.IOException
@@ -13,6 +14,8 @@ class FileReceiver(private val type: Utils.TYPE) : Thread() {
         lateinit var client: Socket
     }
 
+    var receiverCallback : ReceiverCallback? = null
+
     override fun run() {
         super.run()
 
@@ -25,12 +28,26 @@ class FileReceiver(private val type: Utils.TYPE) : Thread() {
 
             while (true) {
                 client = serverSocket.accept()
+                receiverCallback?.onConnected(true, null)
                 //start file saving thread
-                Thread(ReceiverThread(client)).start()
+                val receiverThread = ReceiverThread(client)
+                receiverThread.start()
+                //Thread(ReceiverThread(client)).start()
+                receiverThread.onProgress = this::onProgress
+                receiverThread.onComplete = this::onComplete
             }
         } catch (e: IOException) {
             e.printStackTrace()
+            receiverCallback?.onConnected(false, e)
         }
 
+    }
+
+    private fun onComplete() {
+        receiverCallback?.onComplete()
+    }
+
+    private fun onProgress(p1: String) {
+        receiverCallback?.onReceivingProgress(p1)
     }
 }

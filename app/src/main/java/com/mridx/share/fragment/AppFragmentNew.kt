@@ -10,16 +10,20 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.mridx.share.R
 import com.mridx.share.adapter.AppAdapter
 import com.mridx.share.data.AppData
+import com.mridx.share.utils.FileSenderType
 import kotlinx.android.synthetic.main.app_fragment.*
 import java.io.File
 import java.text.DecimalFormat
 
 class AppFragmentNew : Fragment(), (ArrayList<AppData>) -> Unit {
+
+    var onSendAction : ((ArrayList<Any>, FileSenderType) -> Unit)? = null
 
     private lateinit var appAdapter: AppAdapter
     lateinit var btmView: MaterialCardView
@@ -41,17 +45,18 @@ class AppFragmentNew : Fragment(), (ArrayList<AppData>) -> Unit {
         appAdapter.setAppAdapterClicked { selectedList -> showSendBtn(selectedList.size) }
         val appCheckBox: MaterialCheckBox = view.findViewById(R.id.appCheckbox)
         appCheckBox.setOnCheckedChangeListener { _, b -> appAdapter.setAllChecked(b) }
-        appSendBtn.setOnClickListener { handleSendAction() }
+        view.findViewById<MaterialButton>(R.id.appSendBtn).setOnClickListener { handleSendAction() }
         return view
     }
 
     private fun handleSendAction() {
-        val selectedList = appAdapter.selectedAppList
+        val selectedList : ArrayList<AppData> = appAdapter.selectedAppList
         if (selectedList.size == 0) {
             Toast.makeText(context, "Select at least one App", Toast.LENGTH_SHORT).show()
             return
         }
-
+        Toast.makeText(context, "Send selected apps, Total - " + selectedList.size, Toast.LENGTH_SHORT).show()
+        onSendAction?.invoke(selectedList as ArrayList<Any>, FileSenderType.APP)
 
     }
 

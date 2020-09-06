@@ -2,24 +2,36 @@ package com.mridx.share.ui;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiNetworkSpecifier;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
+import com.google.android.material.textview.MaterialTextView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.mridx.share.data.Utils;
 import com.mridx.share.helper.PermissionHelper;
 import com.mridx.test.misc.WiFiReceiver;
 
@@ -34,15 +46,20 @@ public class JoinUI extends AppCompatActivity {
 
     private WifiManager wifiManager;
 
-    private String TAG = "kaku";
+    private int connectedNId = -1;
+
+    private String TAG = "kaku", ssid;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         if (wifiManager == null)
-            wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+            wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        if (!wifiManager.isWifiEnabled()) {
+            wifiManager.setWifiEnabled(true);
+        }
 
 
         receiver = new WiFiReceiver();
@@ -112,6 +129,7 @@ public class JoinUI extends AppCompatActivity {
         if (r.contains("/")) {
             String[] data = r.split("/");
             String name = data[0];
+            this.ssid = name;
             String password = data[1];
             WifiConfiguration configuration = getWifiConfig(name);
             if (configuration == null) {
@@ -128,12 +146,37 @@ public class JoinUI extends AppCompatActivity {
     }
 
     private synchronized void createWPAProfile(String name, String password) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            WifiNetworkSpecifier.Builder builder = new WifiNetworkSpecifier.Builder();
+            builder.setSsid(name);
+            builder.setWpa2Passphrase(password);
+
+            WifiNetworkSpecifier wifiNetworkSpecifier = builder.build();
+            NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
+            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+            networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
+            NetworkRequest networkRequest = networkRequestBuilder.build();
+            ConnectivityManager cm = (ConnectivityManager) getBaseContext().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (cm != null) {
+                cm.requestNetwork(networkRequest, new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(@NonNull Network network) {
+                        super.onAvailable(network);
+                        cm.bindProcessToNetwork(network);
+                        goToFiles();
+                    }
+                });
+            }
+            return;
+
+        }
         WifiConfiguration configuration = new WifiConfiguration();
-        configuration.SSID = "\"" + name + "\"";
-        configuration.preSharedKey = "\"" + password + "\"";
-        configuration.priority = 1;
+        configuration.SSID = "\"" + name + "\""; /*name;*/
+        configuration.preSharedKey = "\"" + password + "\""; /*password;*/
+        //configuration.priority = 40;
         configuration.status = WifiConfiguration.Status.ENABLED;
         int networkId = wifiManager.addNetwork(configuration);
+        connectedNId = networkId;
         wifiManager.disconnect();
         wifiManager.enableNetwork(networkId, true);
         wifiManager.reconnect();
@@ -149,7 +192,8 @@ public class JoinUI extends AppCompatActivity {
         if (configurationList != null) {
             for (WifiConfiguration wifiConfiguration : configurationList) {
                 if (wifiConfiguration.SSID != null && wifiConfiguration.SSID.equalsIgnoreCase(name))
-                    return wifiConfiguration;
+                    connectedNId = wifiConfiguration.networkId;
+                return wifiConfiguration;
             }
         }
         return null;
@@ -159,15 +203,23 @@ public class JoinUI extends AppCompatActivity {
         if (wifiManager == null)
             wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
 
+
+
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
-        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-        goToFiles();
+        if (wifiInfo.getSSID().equals(ssid)) {
+            goToFiles();
+        }
+
+        /*if (wifiInfo.getNetworkId() == connectedNId) {
+            Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+            goToFiles();
+        }*/
     }
 
     public void goToFiles() {
         Intent intent = new Intent(this, MainUI.class);
-        intent.putExtra("TYPE", MainUI.USER_TYPE.CLIENT);
+        intent.putExtra("TYPE", Utils.TYPE.CLIENT);
         startActivity(intent);
         finish();
     }
@@ -176,7 +228,7 @@ public class JoinUI extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
     }
 
     @Override

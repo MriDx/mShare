@@ -15,6 +15,9 @@ class SenderThread(private val fileSenderData: FileSenderData, private val socke
         var dataType: String? = null
     }
 
+    var onProgress: ((String) -> Unit)? = null
+    var onComplete: (() -> Unit)? = null
+
     override fun run() {
         super.run()
 
@@ -45,17 +48,27 @@ class SenderThread(private val fileSenderData: FileSenderData, private val socke
 
                 var theByte: Int = 0
 
-                while (bufferedInputStream.read().also {
+                val buf = ByteArray(1024)
+                var len : Int = 0;
+                while (bufferedInputStream.read(buf).also { len = it } != -1) {
+                    bos.write(buf, 0, len)
+                    //onProgress?.invoke(fileData.name)
+                    Log.d("kaku", "sendFiles: ${fileData.name} $len")
+                }
+
+                /*while (bufferedInputStream.read().also {
                             theByte = it
                         } != -1) {
                     bos.write(theByte)
+                    //onProgress?.invoke(fileData.name)
                     Log.d("kaku", "sendFiles: ${fileData.name} $theByte")
-                }
+                }*/
                 bufferedInputStream.close()
 
             }
 
             dos.close()
+            onComplete?.invoke()
 
         } catch (e: FileNotFoundException) {
             e.printStackTrace()

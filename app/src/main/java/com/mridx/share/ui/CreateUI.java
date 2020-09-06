@@ -29,6 +29,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.mridx.share.R;
+import com.mridx.share.data.Utils;
 import com.mridx.share.helper.PermissionHelper;
 import com.mridx.test.misc.WiFiReceiver;
 
@@ -106,8 +107,8 @@ public class CreateUI extends AppCompatActivity {
             }
         }
         WifiConfiguration configuration = new WifiConfiguration();
-        configuration.SSID = "AndroidHotspot-mShare";
-        configuration.preSharedKey = "password";
+        configuration.SSID = "AndroidHotspot-mShare-1";
+        configuration.preSharedKey = "9854935115";
         configuration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
         configuration.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
         configuration.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
@@ -236,7 +237,7 @@ public class CreateUI extends AppCompatActivity {
 
     public void goToFiles() {
         Intent intent = new Intent(this, MainUI.class);
-        intent.putExtra("TYPE", MainUI.USER_TYPE.HOST);
+        intent.putExtra("TYPE", Utils.TYPE.HOST);
         startActivity(intent);
         finish();
     }

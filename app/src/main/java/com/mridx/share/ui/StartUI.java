@@ -86,71 +86,6 @@ public class StartUI extends AppCompatActivity {
     }
 
 
-    public void getAllAudioFromDevice(final Context context) {
-        ContentResolver contentResolver = context.getContentResolver();
-
-        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        //Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getAbsolutePath());
-        int count = 0;
-
-        ArrayList<String> songs = new ArrayList<>();
-        ArrayList<byte[]> arts = new ArrayList<>();
-
-
-        Cursor cursor = contentResolver.query(
-                uri, // Uri
-                null,
-                null,
-                null,
-                null
-        );
-        MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                int Title = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
-
-                String songTitle = cursor.getString(Title);
-                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                Log.d(TAG, "getAllAudioFromDevice: " + songTitle);
-                Log.d(TAG, "getAllAudioFromDevice: " + path);
-                File file = new File(path);
-                mediaMetadataRetriever.setDataSource(file.getAbsolutePath());
-                byte[] art = mediaMetadataRetriever.getEmbeddedPicture();
-                //arts.add(art);
-                setToImg(art);
-                songs.add(songTitle);
-                getAlbumArtUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)));
-                //setToBtn(getAlbumArtUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))).toString());
-                //Log.d(TAG, "getAllAudioFromDevice: " + getAlbumArtUri(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))).toString());
-            } while (cursor.moveToNext());
-
-        }
-
-        Log.d(TAG, "getAllAudioFromDevice: " + songs.size());
-
-
-    }
-
-    private void setToImg(byte[] art) {
-        if (art != null) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(art, 0, art.length);
-            img.setImageBitmap(bitmap);
-        }
-    }
-
-    public static String getAlbumArtUri(String albumId) {
-        Uri sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-        Uri uri = ContentUris.withAppendedId(sArtworkUri, Long.parseLong(albumId));
-        Log.d("kaku", "getAlbumArtUri: " + uri.toString());
-        return uri.toString();
-    }
-
-    private void setToBtn(String art) {
-        Bitmap bitmap = BitmapFactory.decodeFile(art);
-        img.setImageBitmap(bitmap);
-    }
-
-
     public void startHost(View view) {
         //startActivity(new Intent(this, /*SenderHost.class*/ MainUI.class));
         startActivity(new Intent(this, CreateUI.class));
@@ -159,7 +94,7 @@ public class StartUI extends AppCompatActivity {
 
     public void joinHost(View view) {
         //startActivity(new Intent(this, SenderClient.class));
-        startActivity(new Intent(this, /*JoinUI.class*/ MainUI.class));
+        startActivity(new Intent(this, JoinUI.class /*MainUI.class*/));
         //startScanner();
     }
 

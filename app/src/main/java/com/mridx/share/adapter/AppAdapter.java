@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
 
     private ArrayList<AppData> appList = new ArrayList<>();
-    public ArrayList<AppData> selectedAppList = new ArrayList<>();
+    private ArrayList<AppData> selectedAppList = new ArrayList<>();
 
     private int SELECTED = 0, NORMAL = 1;
 
@@ -64,6 +64,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
                 selectedAppList.add(appData);
         }
         appAdapterClicked.onClicked(selectedAppList);
+    }
+
+    public ArrayList<AppData> getSelectedAppList() {
+        return selectedAppList;
     }
 
     public void setAllChecked(boolean b) {
