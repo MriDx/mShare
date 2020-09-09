@@ -8,7 +8,7 @@ import java.io.FileReader;
 public class Util {
 
     public static String getConnectedClientList() {
-        String ip = "";
+        String ip = "0.0.0.0";
         int clientcount = 0;
         BufferedReader br = null;
         try {
@@ -31,7 +31,6 @@ public class Util {
                     Log.d(TAG, "getConnectedClientList: " + "Client_count  " + clientcount + " MAC_ADDRESS  " + mac);*/
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             return ip;

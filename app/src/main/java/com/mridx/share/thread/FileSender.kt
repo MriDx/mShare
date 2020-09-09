@@ -14,8 +14,8 @@ class FileSender(private val fileSenderData: FileSenderData) : Thread(), (String
         super.run()
         try {
             val socket: Socket = when (fileSenderData.type) {
-                Utils.TYPE.CLIENT -> Socket(fileSenderData.ip, Utils.HOST_PORT)
-                else -> Socket(Utils.HOST_IP, Utils.HOST_PORT)
+                Utils.TYPE.CLIENT -> Socket(Utils.HOST_IP, Utils.HOST_PORT)
+                else -> Socket(fileSenderData.ip, Utils.CLIENT_PORT)
             }
             fileSenderCallback?.setOnSenderCallback(true, null)
 

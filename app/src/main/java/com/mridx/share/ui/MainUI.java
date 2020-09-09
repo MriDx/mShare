@@ -82,11 +82,15 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
         userType = (Utils.TYPE) getIntent().getExtras().get("TYPE");
         if (userType == Utils.TYPE.CLIENT) {
             //getIP();
+            fileReceiver = new FileReceiver(Utils.TYPE.CLIENT);
+            fileReceiver.start();
+            fileReceiver.setReceiverCallback(this);
         }
         if (userType == Utils.TYPE.HOST) {
             fileReceiver = new FileReceiver(Utils.TYPE.HOST);
             fileReceiver.start();
             fileReceiver.setReceiverCallback(this);
+            getIP();
         }
 
         viewPager = findViewById(R.id.viewPager);
