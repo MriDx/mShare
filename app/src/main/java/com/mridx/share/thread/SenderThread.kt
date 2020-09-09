@@ -1,10 +1,7 @@
 package com.mridx.share.thread
 
 import android.util.Log
-import com.mridx.share.data.AppData
-import com.mridx.share.data.FileSendData
-import com.mridx.share.data.FileSenderData
-import com.mridx.share.data.MusicData
+import com.mridx.share.data.*
 import com.mridx.share.utils.FileSenderType
 import java.io.*
 import java.net.Socket
@@ -49,7 +46,7 @@ class SenderThread(private val fileSenderData: FileSenderData, private val socke
                 var theByte: Int = 0
 
                 val buf = ByteArray(1024)
-                var len : Int = 0;
+                var len: Int = 0;
                 while (bufferedInputStream.read(buf).also { len = it } != -1) {
                     bos.write(buf, 0, len)
                     //onProgress?.invoke(fileData.name)
@@ -81,8 +78,24 @@ class SenderThread(private val fileSenderData: FileSenderData, private val socke
         return when (fileSenderData.fileSenderType) {
             FileSenderType.APP -> getApps(fileSenderData.list)
             FileSenderType.MUSIC -> getMusic(fileSenderData.list)
+            FileSenderType.VIDEO -> getVideos(fileSenderData.list)
+            FileSenderType.FOLDER -> getFolders(fileSenderData.list)
             else -> getApps(fileSenderData.list)
         }
+    }
+
+
+    private fun getFolders(list: java.util.ArrayList<Any>): java.util.ArrayList<FileSendData> {
+        TODO("Not yet implemented")
+    }
+
+    private fun getVideos(list: java.util.ArrayList<Any>): java.util.ArrayList<FileSendData> {
+        dataType = "video"
+        val datalist: ArrayList<FileSendData> = ArrayList()
+        for (videoData: VideoData in list as ArrayList<VideoData>) {
+            datalist.add(FileSendData(videoData.path, videoData.title))
+        }
+        return datalist
     }
 
     private fun getMusic(list: java.util.ArrayList<Any>): java.util.ArrayList<FileSendData> {

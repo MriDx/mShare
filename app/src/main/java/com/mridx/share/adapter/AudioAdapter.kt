@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.mridx.share.R
+import com.mridx.share.data.AppData
 import com.mridx.share.data.MusicData
 import com.mridx.share.ui.MainUI
 import kotlinx.android.synthetic.main.music_view.view.*
@@ -76,6 +77,8 @@ class AudioAdapter() : RecyclerView.Adapter<AudioAdapter.myViewHolder>(), Filter
         }
         onSelected?.invoke(musicListSelected)
     }
+
+    fun getSelectedList(): ArrayList<MusicData> = this.musicListSelected
 
 
     override fun getFilter(): Filter {

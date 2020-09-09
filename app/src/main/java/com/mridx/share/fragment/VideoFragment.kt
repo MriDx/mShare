@@ -10,12 +10,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.mridx.share.R
 import com.mridx.share.adapter.VideoAdapter
+import com.mridx.share.data.MusicData
 import com.mridx.share.data.VideoData
+import com.mridx.share.utils.FileSenderType
 import kotlinx.android.synthetic.main.music_fragment.*
 import kotlinx.android.synthetic.main.music_fragment.view.*
 import kotlinx.android.synthetic.main.video_fragment.*
@@ -23,6 +27,8 @@ import kotlinx.android.synthetic.main.video_fragment.btmView
 import java.text.DecimalFormat
 
 class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit, (Boolean, ArrayList<VideoData>) -> Unit {
+
+    var onSendAction : ((ArrayList<Any>, FileSenderType) -> Unit)? = null
 
     val GB = (1024 * 1024 * 1024).toDouble()
     val MB = (1024 * 1024).toDouble()
@@ -42,8 +48,20 @@ class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit, (Boolean, Arra
             adapter = videoAdapter
             layoutManager = LinearLayoutManager(context)
         }
+        view.findViewById<MaterialButton>(R.id.sendBtn).setOnClickListener { handleSendAction() }
         //videoAdapter.setVideoList(getAllVideo(view.context))
         return view
+    }
+
+    private fun handleSendAction() {
+        val selectedList : ArrayList<VideoData> = videoAdapter.getSelectedList()
+        if (selectedList.size == 0) {
+            Toast.makeText(context, "Select at least one Video ", Toast.LENGTH_SHORT).show()
+            return
+        }
+        Toast.makeText(context, "Send selected videos, Total - " + selectedList.size, Toast.LENGTH_SHORT).show()
+        onSendAction?.invoke(selectedList as ArrayList<Any>, FileSenderType.VIDEO)
+
     }
 
     private fun getVideos(context: Context) {

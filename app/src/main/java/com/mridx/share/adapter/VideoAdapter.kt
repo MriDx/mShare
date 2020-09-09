@@ -84,6 +84,8 @@ class VideoAdapter : RecyclerView.Adapter<VideoAdapter.ViewHolder>(), Filterable
         onSelected?.invoke(videoListSelected)
     }
 
+    fun getSelectedList(): ArrayList<VideoData> = this.videoListSelected
+
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(p0: CharSequence?): FilterResults {

@@ -66,7 +66,7 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
     }*/
 
     public Utils.TYPE userType;
-    public String ip = "192.168.43.1";
+    public String ip = "";
     private FileReceiver fileReceiver;
 
     @Override
@@ -100,18 +100,25 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
         tabLayout.setupWithViewPager(viewPager);
         AppFragmentNew appFragmentNew = new AppFragmentNew();
         appFragmentNew.setOnSendAction(this);
+        MusicFragment musicFragment = new MusicFragment();
+        musicFragment.setOnSendAction(this);
+        VideoFragment videoFragment = new VideoFragment();
+        videoFragment.setOnSendAction(this);
+        /*FileFragment fileFragment = new FileFragment();
+        fileFragment.setOnFilesSendAction(this::onFileSendAction);*/
 
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPagerAdapter.addFragment(appFragmentNew, "APP");
         viewPagerAdapter.addFragment(new PhotoFragment(), "PHOTO");
-        viewPagerAdapter.addFragment(new MusicFragment(), "MUSIC");
-        viewPagerAdapter.addFragment(new VideoFragment(), "VIDEO");
-        viewPagerAdapter.addFragment(new FileFragment(), "FILE");
+        viewPagerAdapter.addFragment(musicFragment, "MUSIC");
+        viewPagerAdapter.addFragment(videoFragment, "VIDEO");
+        //viewPagerAdapter.addFragment(new FileFragment(), "FILE");
 
 
         viewPager.setAdapter(viewPagerAdapter);
 
     }
+
 
     private void getIP() {
         ip = Util.getConnectedClientList();
@@ -138,6 +145,12 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
         fileSender.setFileSenderCallback(this);
         fileSender.start();
         return null;
+    }
+
+    private void onFileSendAction(ArrayList<Object> objects, FileSenderType type) {
+        FileSender fileSender = new FileSender(new FileSenderData(objects, type, userType, ip));
+        fileSender.setFileSenderCallback(this);
+        fileSender.start();
     }
 
     @Override

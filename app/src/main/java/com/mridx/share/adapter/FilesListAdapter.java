@@ -18,6 +18,7 @@ import com.mridx.share.R;
 import com.mridx.share.data.FileData;
 import com.mridx.share.fragment.FilesListFragment;
 import com.mridx.share.ui.MainUI;
+import com.mridx.share.utils.FileSenderType;
 import com.mridx.share.utils.FileType;
 import com.mridx.share.utils.FileUtils;
 
@@ -31,6 +32,17 @@ import static com.mridx.share.utils.FileUtils.MB;
 public class FilesListAdapter extends RecyclerView.Adapter<FilesListAdapter.ViewHolder> {
 
     private ArrayList<FileData> fileList = new ArrayList<>();
+    private ArrayList<FileData> fileListSelected = new ArrayList<>();
+
+    OnSelectedItem onSelectedItem;
+
+    public interface OnSelectedItem {
+        void onSelect(ArrayList<FileData> list);
+    }
+
+    public void setOnSelectedItem(OnSelectedItem onSelectedItem) {
+        this.onSelectedItem = onSelectedItem;
+    }
 
     OnAdapterItemClicked onAdapterItemClicked;
 
@@ -62,6 +74,18 @@ public class FilesListAdapter extends RecyclerView.Adapter<FilesListAdapter.View
         this.fileList = fileList;
         //setHasStableIds(true);
         notifyDataSetChanged();
+    }
+
+    private void addToSelected() {
+        fileListSelected.clear();
+        for (FileData fileData : fileList) {
+            if (fileData.isSelected()) fileListSelected.add(fileData);
+        }
+        onSelectedItem.onSelect(fileListSelected);
+    }
+
+    public ArrayList<FileData> getFileListSelected() {
+        return this.fileListSelected;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -97,6 +121,7 @@ public class FilesListAdapter extends RecyclerView.Adapter<FilesListAdapter.View
             itemView.findViewById(R.id.checkView).setOnClickListener(view -> {
                 fileData.setSelected(true);
                 notifyDataSetChanged();
+                addToSelected();
             });
             itemView.setOnClickListener(view -> onAdapterItemClicked.onClicked(fileData));
 

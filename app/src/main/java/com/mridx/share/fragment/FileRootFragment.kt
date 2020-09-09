@@ -96,7 +96,8 @@ class FileRootFragment : Fragment(), (StorageData) -> Unit, (Boolean, ArrayList<
     }
 
     override fun invoke(p1: Boolean, p2: ArrayList<StorageData>) {
-        storageAdapter.setList(p2)
+        activity?.runOnUiThread{storageAdapter.setList(p2)}
+        //storageAdapter.setList(p2)
     }
 
 

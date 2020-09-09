@@ -2,6 +2,8 @@ package com.mridx.share.thread
 
 import android.os.Environment
 import android.util.Log
+import com.mridx.share.data.Utils
+import com.mridx.share.utils.FileType
 import java.io.*
 import java.net.Socket
 
@@ -45,7 +47,11 @@ class ReceiverThread(private val socket: Socket) : Thread() {
             val length = dataInputStream.readLong() //file size
             val path = dataInputStream.readUTF().replace("./", "/") //file path
             val name = dataInputStream.readUTF() //file name
-            val dir = File("${extStorage}/mshare/${dataType}", path)
+            var dir: File;
+            dir = if (dataType == "music" || dataType == "app" || dataType == "photo" || dataType == "video") {
+                File("${extStorage}/mshare/${dataType}", "")
+            } else
+                File("${extStorage}/mshare/${dataType}", path)
             if (!dir.exists()) dir.mkdirs()
             files[i] = File(dir, name)
             val fileOutputStream = FileOutputStream(files[i])

@@ -43,6 +43,7 @@ public class CreateUI extends AppCompatActivity {
 
     private BroadcastReceiver receiver;
     private IntentFilter intentFilter;
+    private BottomSheetDialog qrViewer;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -179,7 +180,8 @@ public class CreateUI extends AppCompatActivity {
     }
 
     private void showQR(Bitmap bmp) {
-        BottomSheetDialog qrViewer = new BottomSheetDialog(this);
+        qrViewer = null;
+        qrViewer = new BottomSheetDialog(this);
         qrViewer.setContentView(R.layout.qr_view);
         qrViewer.show();
         qrViewer.findViewById(R.id.qrClose).setOnClickListener(view -> {
@@ -254,4 +256,9 @@ public class CreateUI extends AppCompatActivity {
         registerReceiver(receiver, intentFilter);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        qrViewer = null;
+    }
 }

@@ -13,18 +13,24 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import com.mridx.share.R
 import com.mridx.share.adapter.AudioAdapter
+import com.mridx.share.data.AppData
 import com.mridx.share.data.MusicData
+import com.mridx.share.utils.FileSenderType
 import kotlinx.android.synthetic.main.music_fragment.*
 import kotlinx.android.synthetic.main.music_fragment.view.*
 import java.text.DecimalFormat
 
 
 class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit, (Boolean, ArrayList<MusicData>) -> Unit {
+
+    var onSendAction : ((ArrayList<Any>, FileSenderType) -> Unit)? = null
 
     val MB = (1024 * 1024).toDouble()
     val KB = 1024.toDouble()
@@ -43,8 +49,20 @@ class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit, (Boolean, Arra
             adapter = audioAdapter
             layoutManager = LinearLayoutManager(context)
         }
+        view.findViewById<MaterialButton>(R.id.sendBtn).setOnClickListener { handleSendAction() }
         //audioAdapter.setMusicList(getAllAudio(container!!.context))
         return view
+    }
+
+    private fun handleSendAction() {
+        val selectedList : ArrayList<MusicData> = audioAdapter.getSelectedList()
+        if (selectedList.size == 0) {
+            Toast.makeText(context, "Select at least one Music", Toast.LENGTH_SHORT).show()
+            return
+        }
+        Toast.makeText(context, "Send selected music, Total - " + selectedList.size, Toast.LENGTH_SHORT).show()
+        onSendAction?.invoke(selectedList as ArrayList<Any>, FileSenderType.MUSIC)
+
     }
 
     private fun getMusic(context: Context) {
@@ -65,40 +83,6 @@ class MusicFragment : Fragment(), (ArrayList<MusicData>) -> Unit, (Boolean, Arra
             }
         })
     }
-
-//region not needed
-    /*@SuppressLint("Recycle")
-    private fun getAllAudio(context: Context): ArrayList<MusicData> {
-        val audioList = ArrayList<MusicData>()
-        val contentResolver = context.contentResolver
-        val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val cursor = contentResolver.query(
-                uri,
-                null,
-                null,
-                null,
-                null
-        )
-
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                val title = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)
-                val songTitle = cursor.getString(title)
-
-                val size: Int = cursor.getColumnIndex(MediaStore.Audio.Media.SIZE)
-                val songSize = getSongSize(cursor.getString(size))
-                //to get the path of an audio file
-                val audioPath = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                Log.d("nihal", audioPath)
-
-
-                val albumArt: String = getAlbumart(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)))
-                audioList.add(MusicData(songTitle, albumArt, songSize, audioPath, false))
-            } while (cursor.moveToNext())
-        }
-        return audioList
-    }*/
-    //endregion
 
     private fun getAlbumart(albumId: String): String {
         val albumArtUri: Uri = Uri.parse("content://media/external/audio/albumart")

@@ -15,14 +15,27 @@ import com.mridx.share.R;
 import com.mridx.share.data.FileData;
 import com.mridx.share.data.StorageData;
 import com.mridx.share.ui.MainUI;
+import com.mridx.share.utils.FileSenderType;
 import com.mridx.share.utils.FileType;
+
+import java.util.ArrayList;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
 public class FileFragment extends Fragment implements MainUI.OnItemClickedListener, MainUI.OnBackPressed, Function1<StorageData, Unit> {
 
+    OnFilesSendAction onFilesSendAction;
+    public interface OnFilesSendAction {
+        void onSend(ArrayList<Object> list, FileSenderType type);
+    }
+
+    public void setOnFilesSendAction(OnFilesSendAction onFilesSendAction) {
+        this.onFilesSendAction = onFilesSendAction;
+    }
+
     private MainUI mainUI;
+
 
     @Nullable
     @Override
@@ -53,10 +66,16 @@ public class FileFragment extends Fragment implements MainUI.OnItemClickedListen
             builder.setPath(fileData.getPath());
             return null;
         });
+        filesListFragment.setOnSendAction(this::onSend);
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.filesListHolder, filesListFragment);
         fragmentTransaction.addToBackStack(fileData.getPath());
         fragmentTransaction.commit();
+    }
+
+    private Unit onSend(ArrayList<Object> objects, FileSenderType fileSenderType) {
+        onFilesSendAction.onSend(objects, fileSenderType);
+        return null;
     }
 
     @Override

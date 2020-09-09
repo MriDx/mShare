@@ -50,7 +50,6 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.MyViewHolder> {
             } else {
                 appList.get(position).setSelected(true);
             }
-            //appList.get(position).setSelected(!appList.get(position).isSelected());
             notifyDataSetChanged();
             sendSelectedApp();
         });
