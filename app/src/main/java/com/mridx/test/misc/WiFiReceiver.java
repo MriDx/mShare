@@ -7,12 +7,7 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.mridx.share.ui.CreateUI;
 import com.mridx.share.ui.JoinUI;
-import com.mridx.share.ui.StartUI;
-import com.mridx.test.ui.Receive;
-import com.mridx.test.ui.ReceiveMulticast;
-import com.mridx.test.ui.SendMulticast;
 import com.mridx.test.ui.Test;
 
 import java.io.BufferedReader;
@@ -54,9 +49,9 @@ public class WiFiReceiver extends BroadcastReceiver {
             }
         } else if ("android.net.wifi.WIFI_HOTSPOT_CLIENTS_CHANGED".equals(action)) {
             Log.d(TAG, "onReceive: client changed");
-            if (context instanceof CreateUI) {
+            /*if (context instanceof CreateUI) {
                 ((CreateUI) context).goToFiles();
-            }
+            }*/
         }
     }
 

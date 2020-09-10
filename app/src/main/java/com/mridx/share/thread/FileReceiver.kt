@@ -29,10 +29,11 @@ class FileReceiver(private val type: Utils.TYPE) : Thread() {
             while (true) {
                 client = serverSocket.accept()
                 receiverCallback?.onConnected(true, null)
+
                 //start file saving thread
                 val receiverThread = ReceiverThread(client)
                 receiverThread.start()
-                //Thread(ReceiverThread(client)).start()
+
                 receiverThread.onProgress = this::onProgress
                 receiverThread.onComplete = this::onComplete
             }

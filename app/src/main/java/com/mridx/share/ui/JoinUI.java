@@ -17,24 +17,31 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
-import com.google.android.material.textview.MaterialTextView;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.mridx.share.data.Utils;
 import com.mridx.share.helper.PermissionHelper;
+import com.mridx.share.thread.ClientConnectionSender;
+import com.mridx.share.utils.Util;
 import com.mridx.test.misc.WiFiReceiver;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.List;
 
 public class JoinUI extends AppCompatActivity {
@@ -46,7 +53,7 @@ public class JoinUI extends AppCompatActivity {
 
     private WifiManager wifiManager;
 
-    private int connectedNId = -1;
+    private int connectedNId = -1, PANEL_REQ = 900;
 
     private String TAG = "kaku", ssid;
 
@@ -57,26 +64,48 @@ public class JoinUI extends AppCompatActivity {
         if (wifiManager == null)
             wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        if (!wifiManager.isWifiEnabled()) {
-            wifiManager.setWifiEnabled(true);
-        }
-
 
         receiver = new WiFiReceiver();
         intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         intentFilter.addAction("android.net.wifi.WIFI_AP_STATE_CHANGED");
-        //intentFilter.addAction("android.net.wifi.WIFI_HOTSPOT_CLIENTS_CHANGED");
 
+        if (!wifiManager.isWifiEnabled()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                askForWifi();
+                return;
+            } else
+                wifiManager.setWifiEnabled(true);
+        }
 
-        //goToFiles();
         startScanner();
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void askForWifi() {
+        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setMessage("Please turn on WIFI to continue to the app");
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Go to Settings", (dialogInterface, i) -> {
+            dialogInterface.dismiss();
+            openWIFISettings();
+        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Exit", (dialogInterface, i) -> {
+            dialogInterface.dismiss();
+            finish();
+        });
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void openWIFISettings() {
+        Intent panelIntent = new Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY);
+        startActivityForResult(panelIntent, PANEL_REQ);
+    }
+
     private void startScanner() {
         if (!PermissionHelper.checkIfHasPermission(this)) {
-            Log.d(TAG, "turnOnHotspot: permission not allowed");
             PermissionHelper.askForPermission(this);
             return;
         }
@@ -122,6 +151,13 @@ public class JoinUI extends AppCompatActivity {
             startScanner();
         } else if (requestCode == PermissionHelper.APP_SETTINGS_REQ) {
             startScanner();
+        } else if (requestCode == PANEL_REQ) {
+            if (wifiManager.isWifiEnabled()) {
+                startScanner();
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                    askForWifi();
+            }
         }
     }
 
@@ -134,14 +170,11 @@ public class JoinUI extends AppCompatActivity {
             WifiConfiguration configuration = getWifiConfig(name);
             if (configuration == null) {
                 createWPAProfile(name, password);
-                //configuration = getWifiConfig(name);
             } else {
                 wifiManager.disconnect();
                 wifiManager.enableNetwork(configuration.networkId, true);
                 wifiManager.reconnect();
             }
-            //open file page
-            //goToFiles();
         }
     }
 
@@ -163,17 +196,16 @@ public class JoinUI extends AppCompatActivity {
                     public void onAvailable(@NonNull Network network) {
                         super.onAvailable(network);
                         cm.bindProcessToNetwork(network);
-                        goToFiles();
+                        //goToFiles();
+                        startCheckingHost();
                     }
                 });
             }
             return;
-
         }
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = "\"" + name + "\""; /*name;*/
         configuration.preSharedKey = "\"" + password + "\""; /*password;*/
-        //configuration.priority = 40;
         configuration.status = WifiConfiguration.Status.ENABLED;
         int networkId = wifiManager.addNetwork(configuration);
         connectedNId = networkId;
@@ -191,9 +223,10 @@ public class JoinUI extends AppCompatActivity {
         List<WifiConfiguration> configurationList = wifiManager.getConfiguredNetworks();
         if (configurationList != null) {
             for (WifiConfiguration wifiConfiguration : configurationList) {
-                if (wifiConfiguration.SSID != null && wifiConfiguration.SSID.equalsIgnoreCase(name))
+                if (wifiConfiguration.SSID != null && wifiConfiguration.SSID.equalsIgnoreCase(name)) {
                     connectedNId = wifiConfiguration.networkId;
-                return wifiConfiguration;
+                    return wifiConfiguration;
+                }
             }
         }
         return null;
@@ -204,17 +237,52 @@ public class JoinUI extends AppCompatActivity {
             wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
 
 
-
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
         if (wifiInfo.getSSID().equals(ssid)) {
-            goToFiles();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) return;
+            startCheckingHost();
         }
+    }
 
-        /*if (wifiInfo.getNetworkId() == connectedNId) {
-            Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-            goToFiles();
-        }*/
+    private void startCheckingHost() {
+        //ServerSocket serverSocket = new ServerSocket(Utils.CONNECT_CLIENT_PORT);
+
+        new Thread(() -> {
+            try {
+                Log.d(TAG, "startCheckingHost: " + InetAddress.getLocalHost().getHostAddress());
+                Enumeration e = NetworkInterface.getNetworkInterfaces();
+                while (e.hasMoreElements()) {
+                    NetworkInterface n = (NetworkInterface) e.nextElement();
+                    if (n.getDisplayName().toLowerCase().equalsIgnoreCase("wlan0")) {
+                        Enumeration ee = n.getInetAddresses();
+                        while (ee.hasMoreElements()) {
+                            InetAddress i = (InetAddress) ee.nextElement();
+                            if (Util.validateIp(i.getHostAddress())) {
+                                Socket socket = new Socket(Utils.HOST_IP, Utils.CONNECT_HOST_PORT);
+                                this.runOnUiThread(() -> {
+                                    ClientConnectionSender clientConnectionSender = new ClientConnectionSender(socket, i.getHostAddress(), Utils.CLIENT_PORT);
+                                    clientConnectionSender.start();
+                                    clientConnectionSender.setOnConnectionEst(this::onConnectionEst);
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (UnknownHostException | SocketException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void onConnectionEst(boolean b) {
+        if (!b) {
+            // TODO: 10/09/20 connection established failed
+            return;
+        }
+        goToFiles();
     }
 
     public void goToFiles() {
@@ -228,7 +296,7 @@ public class JoinUI extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        //unregisterReceiver(receiver);
+        unregisterReceiver(receiver);
     }
 
     @Override

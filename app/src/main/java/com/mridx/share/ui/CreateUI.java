@@ -31,9 +31,12 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.mridx.share.R;
 import com.mridx.share.data.Utils;
 import com.mridx.share.helper.PermissionHelper;
-import com.mridx.test.misc.WiFiReceiver;
+import com.mridx.share.thread.ConnectionRetriever;
+import com.mridx.share.utils.Util;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.ServerSocket;
 
 public class CreateUI extends AppCompatActivity {
 
@@ -49,19 +52,16 @@ public class CreateUI extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        receiver = new WiFiReceiver();
+        /*receiver = new WiFiReceiver();
         intentFilter = new IntentFilter();
-        //intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        //intentFilter.addAction("android.net.wifi.WIFI_AP_STATE_CHANGED");
-        intentFilter.addAction("android.net.wifi.WIFI_HOTSPOT_CLIENTS_CHANGED");
+        intentFilter.addAction("android.net.wifi.WIFI_HOTSPOT_CLIENTS_CHANGED");*/
 
         turnOnHotspot();
-    }
 
+    }
 
     private void turnOnHotspot() {
         if (!PermissionHelper.checkIfHasPermission(this)) {
-            Log.d(TAG, "turnOnHotspot: permission not allowed");
             PermissionHelper.askForPermission(this);
             return;
         }
@@ -77,7 +77,6 @@ public class CreateUI extends AppCompatActivity {
                 @Override
                 public void onStarted(WifiManager.LocalOnlyHotspotReservation reservation) {
                     super.onStarted(reservation);
-                    Log.d(TAG, "Wifi Hotspot is on now");
                     hotspotReservation = reservation;
                     generateQR();
                 }
@@ -99,7 +98,6 @@ public class CreateUI extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(this)) {
                 Toast.makeText(this, "Please allow write system settings permission", Toast.LENGTH_LONG).show();
-                Log.v("DANG", " " + !Settings.System.canWrite(this));
                 Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
                 intent.setData(Uri.parse("package:" + this.getPackageName()));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -152,6 +150,7 @@ public class CreateUI extends AppCompatActivity {
                     bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
                 }
             }
+            startServerSocket();
             showQR(bmp);
         } catch (WriterException e) {
             e.printStackTrace();
@@ -173,6 +172,7 @@ public class CreateUI extends AppCompatActivity {
                     bmp.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
                 }
             }
+            startServerSocket();
             showQR(bmp);
         } catch (WriterException e) {
             e.printStackTrace();
@@ -192,6 +192,27 @@ public class CreateUI extends AppCompatActivity {
         qrViewer.setCancelable(false);
     }
 
+    private void startServerSocket() {
+        try {
+            ServerSocket serverSocket = Util.getInstance().getServerSocket();
+            ConnectionRetriever connectionRetriever = new ConnectionRetriever(serverSocket);
+            connectionRetriever.start();
+            connectionRetriever.setOnConnectionReceived(this::onConnectionReceived);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Server socket failed to create", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void onConnectionReceived(boolean b, String s, int i) {
+        if (!b) {
+            // TODO: 10/09/20 failed
+            return;
+        }
+        Utils.CLIENT_IP = s;
+        Utils.CLIENT_PORT = i;
+        goToFiles();
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -247,13 +268,13 @@ public class CreateUI extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(receiver, intentFilter);
+        //registerReceiver(receiver, intentFilter);
     }
 
     @Override

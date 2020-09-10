@@ -15,17 +15,14 @@ import com.mridx.share.callback.ReceiverCallback;
 import com.mridx.share.callback.SenderCallback;
 import com.mridx.share.data.FileData;
 import com.mridx.share.data.FileSenderData;
-import com.mridx.share.data.MusicData;
 import com.mridx.share.data.Utils;
 import com.mridx.share.fragment.AppFragmentNew;
-import com.mridx.share.fragment.FileFragment;
 import com.mridx.share.fragment.MusicFragment;
 import com.mridx.share.fragment.PhotoFragment;
 import com.mridx.share.fragment.VideoFragment;
 import com.mridx.share.thread.FileReceiver;
 import com.mridx.share.thread.FileSender;
 import com.mridx.share.utils.FileSenderType;
-import com.mridx.share.utils.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,10 +58,6 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
         this.onBackPressed = onBackPressed;
     }
 
-   /* public static enum USER_TYPE {
-        HOST, CLIENT
-    }*/
-
     public Utils.TYPE userType;
     public String ip = "";
     private FileReceiver fileReceiver;
@@ -74,14 +67,12 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_ui);
 
-
         if (getIntent().getExtras() == null) {
             finish();
             return;
         }
         userType = (Utils.TYPE) getIntent().getExtras().get("TYPE");
         if (userType == Utils.TYPE.CLIENT) {
-            //getIP();
             fileReceiver = new FileReceiver(Utils.TYPE.CLIENT);
             fileReceiver.start();
             fileReceiver.setReceiverCallback(this);
@@ -90,7 +81,7 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
             fileReceiver = new FileReceiver(Utils.TYPE.HOST);
             fileReceiver.start();
             fileReceiver.setReceiverCallback(this);
-            getIP();
+            //getIP();
         }
 
         viewPager = findViewById(R.id.viewPager);
@@ -120,10 +111,6 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
     }
 
 
-    private void getIP() {
-        ip = Util.getConnectedClientList();
-    }
-
     @Override
     public void onClicked(FileData fileData) {
         onItemClickedListener.onClicked(fileData);
@@ -132,7 +119,6 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
         if (viewPager.getCurrentItem() == 4)
             onBackPressed.onPressed();
         else
@@ -141,7 +127,7 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
 
     @Override
     public Unit invoke(ArrayList<Object> objects, FileSenderType fileSenderType) {
-        FileSender fileSender = new FileSender(new FileSenderData(objects, fileSenderType, userType, ip));
+        FileSender fileSender = new FileSender(new FileSenderData(objects, fileSenderType, userType, userType == Utils.TYPE.CLIENT ? Utils.HOST_IP : Utils.CLIENT_IP));
         fileSender.setFileSenderCallback(this);
         fileSender.start();
         return null;
@@ -156,11 +142,11 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
     @Override
     public void setOnSenderCallback(boolean connected, IOException error) {
         runOnUiThread(() -> {
-            if (error != null) {
+            if (connected) {
                 Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-                return;
+            } else {
+                Toast.makeText(this, "Something went wrong ! " + error.getMessage(), Toast.LENGTH_LONG).show();
             }
-            Toast.makeText(this, "Kiba ata hol bal", Toast.LENGTH_SHORT).show();
         });
     }
 

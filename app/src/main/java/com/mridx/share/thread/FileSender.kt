@@ -26,6 +26,7 @@ class FileSender(private val fileSenderData: FileSenderData) : Thread(), (String
 
         } catch (e: IOException) {
             e.printStackTrace()
+            fileSenderCallback?.setOnSenderCallback(false, e)
         }
 
     }

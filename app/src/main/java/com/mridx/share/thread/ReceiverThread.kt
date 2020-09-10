@@ -53,7 +53,10 @@ class ReceiverThread(private val socket: Socket) : Thread() {
             } else
                 File("${extStorage}/mshare/${dataType}", path)
             if (!dir.exists()) dir.mkdirs()
-            files[i] = File(dir, name)
+            if (dataType == "app")
+                files[i] = File(dir, "$name.apk")
+            else
+                files[i] = File(dir, name)
             val fileOutputStream = FileOutputStream(files[i])
             val bufferOutputStream = BufferedOutputStream(fileOutputStream)
 
