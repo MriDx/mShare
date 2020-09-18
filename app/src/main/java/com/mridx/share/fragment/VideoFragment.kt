@@ -28,7 +28,7 @@ import java.text.DecimalFormat
 
 class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit, (Boolean, ArrayList<VideoData>) -> Unit {
 
-    var onSendAction : ((ArrayList<Any>, FileSenderType) -> Unit)? = null
+    var onSendAction: ((ArrayList<Any>, FileSenderType) -> Unit)? = null
 
     val GB = (1024 * 1024 * 1024).toDouble()
     val MB = (1024 * 1024).toDouble()
@@ -54,7 +54,7 @@ class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit, (Boolean, Arra
     }
 
     private fun handleSendAction() {
-        val selectedList : ArrayList<VideoData> = videoAdapter.getSelectedList()
+        val selectedList: ArrayList<VideoData> = videoAdapter.getSelectedList()
         if (selectedList.size == 0) {
             Toast.makeText(context, "Select at least one Video ", Toast.LENGTH_SHORT).show()
             return
@@ -113,7 +113,7 @@ class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit, (Boolean, Arra
                 Log.d("nihal", videoPath)
 
                 val size = cursor.getColumnIndex(MediaStore.Video.Media.SIZE)
-                val videoSize = getVideoSize(cursor.getString(size))
+                val videoSize = getVideoSize(cursor.getString(size)?:"0")
 
                 videoList.add(VideoData(videoTitle, videoPath, videoSize ?: "0", videoPath, false))
 
@@ -154,7 +154,8 @@ class VideoFragment : Fragment(), (ArrayList<VideoData>) -> Unit, (Boolean, Arra
     }
 
     override fun invoke(p1: Boolean, p2: ArrayList<VideoData>) {
-        videoAdapter.setVideoList(p2)
+        context.run { videoAdapter.setVideoList(p2) }
+        //videoAdapter.setVideoList(p2)
         //progressBar?.visibility = View.GONE
     }
 }

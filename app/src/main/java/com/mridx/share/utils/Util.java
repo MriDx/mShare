@@ -37,6 +37,16 @@ public class Util {
         return serverSocket;
     }
 
+    public void stopServer() {
+        try {
+            if (serverSocket != null) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static boolean validateIp(String s) {
         Matcher m = p.matcher(s);
         return m.matches();

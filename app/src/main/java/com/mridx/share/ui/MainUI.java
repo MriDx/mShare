@@ -152,7 +152,7 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
 
     @Override
     public void setOnFileTransferCallback() {
-        runOnUiThread(()-> {
+        runOnUiThread(() -> {
             Toast.makeText(this, "File send complete", Toast.LENGTH_SHORT).show();
         });
 
@@ -193,5 +193,11 @@ public class MainUI extends AppCompatActivity implements FilesListAdapter.OnAdap
     @Override
     public void onReceivingProgress(String p1) {
         runOnUiThread(() -> Toast.makeText(this, "receiving file - " + p1, Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (fileReceiver != null) fileReceiver.interrupt();
     }
 }

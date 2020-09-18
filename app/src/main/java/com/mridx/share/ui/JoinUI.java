@@ -17,8 +17,10 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,16 +34,10 @@ import com.google.zxing.integration.android.IntentResult;
 import com.mridx.share.data.Utils;
 import com.mridx.share.helper.PermissionHelper;
 import com.mridx.share.thread.ClientConnectionSender;
-import com.mridx.share.utils.Util;
 import com.mridx.test.misc.WiFiReceiver;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Enumeration;
 import java.util.List;
 
 public class JoinUI extends AppCompatActivity {
@@ -239,10 +235,26 @@ public class JoinUI extends AppCompatActivity {
 
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
-        if (wifiInfo.getSSID().equals(ssid)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) return;
-            startCheckingHost();
-        }
+        Toast.makeText(this, wifiInfo.getSSID(), Toast.LENGTH_SHORT).show();
+
+        //Log.d(TAG, "wifiConnected: " + wifiInfo.getSSID());
+
+        new Handler().postDelayed(() -> {
+            if (wifiInfo.getSSID().replaceAll("\"", "").equals(ssid)) {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Toast.makeText(this, "O or higher", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Toast.makeText(this, "N or lower", Toast.LENGTH_SHORT).show();
+                startCheckingHost();
+            } else {
+                Toast.makeText(this, wifiInfo.getSSID() + " is not equals to " + this.ssid, Toast.LENGTH_SHORT).show();
+            }
+            Log.d(TAG, "wifiConnected: " + this.ssid);
+        }, 3*1000);
+
+
     }
 
     private void startCheckingHost() {
@@ -250,36 +262,21 @@ public class JoinUI extends AppCompatActivity {
 
         new Thread(() -> {
             try {
-                Log.d(TAG, "startCheckingHost: " + InetAddress.getLocalHost().getHostAddress());
-                Enumeration e = NetworkInterface.getNetworkInterfaces();
-                while (e.hasMoreElements()) {
-                    NetworkInterface n = (NetworkInterface) e.nextElement();
-                    if (n.getDisplayName().toLowerCase().equalsIgnoreCase("wlan0")) {
-                        Enumeration ee = n.getInetAddresses();
-                        while (ee.hasMoreElements()) {
-                            InetAddress i = (InetAddress) ee.nextElement();
-                            if (Util.validateIp(i.getHostAddress())) {
-                                Socket socket = new Socket(Utils.HOST_IP, Utils.CONNECT_HOST_PORT);
-                                this.runOnUiThread(() -> {
-                                    ClientConnectionSender clientConnectionSender = new ClientConnectionSender(socket, i.getHostAddress(), Utils.CLIENT_PORT);
-                                    clientConnectionSender.start();
-                                    clientConnectionSender.setOnConnectionEst(this::onConnectionEst);
-                                });
-                            }
-                        }
-                    }
-                }
-            } catch (UnknownHostException | SocketException e) {
-                e.printStackTrace();
+                Socket socket = new Socket(Utils.HOST_IP, Utils.CONNECT_HOST_PORT);
+                Log.d(TAG, "startCheckingHost: " + socket.getInetAddress());
+                ClientConnectionSender clientConnectionSender = new ClientConnectionSender(socket, "", Utils.CLIENT_PORT);
+                clientConnectionSender.setOnConnectionEst(this::onConnectionEst);
+                clientConnectionSender.start();
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.d(TAG, "startCheckingHost: Error - " + e);
             }
         }).start();
     }
 
     private void onConnectionEst(boolean b) {
         if (!b) {
-            // TODO: 10/09/20 connection established failed
+            Toast.makeText(this, "failed to connect to host", Toast.LENGTH_SHORT).show();
             return;
         }
         goToFiles();

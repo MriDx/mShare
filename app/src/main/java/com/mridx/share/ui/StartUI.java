@@ -28,6 +28,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
@@ -58,9 +59,13 @@ public class StartUI extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.start_activity);
 
+        FirebaseAnalytics.getInstance(this);
+
         findViewById(R.id.createCard).setOnClickListener(this::startHost);
         findViewById(R.id.joinCard).setOnClickListener(this::joinHost);
         img = findViewById(R.id.img);
+
+        checkStoragePermission();
 
     }
 
@@ -220,29 +225,6 @@ public class StartUI extends AppCompatActivity {
     }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null) {
-            if (result.getContents() == null) {
-                Toast.makeText(this, "No Data Found", Toast.LENGTH_SHORT).show();
-            } else {
-                //showDialog(getString(R.string.verifyingQR));
-                String r = result.getContents();
-                /*Intent intent = new Intent();
-                intent.putExtra("RESULT", r);*/
-                ParseResult(r);
-            }
-            return;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PermissionHelper.SYSTEM_PERMISSION_REQ) {
-            turnOnHotspot();
-        } else if (requestCode == PermissionHelper.APP_SETTINGS_REQ) {
-            turnOnHotspot();
-        }
-    }
-
     private void ParseResult(String r) {
         if (r.contains("/")) {
             String[] data = r.split("/");
@@ -327,17 +309,35 @@ public class StartUI extends AppCompatActivity {
         startActivity(new Intent(this, MainUI.class));
     }
 
-    /*@Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(receiver);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) {
+                Toast.makeText(this, "No Data Found", Toast.LENGTH_SHORT).show();
+            } else {
+                //showDialog(getString(R.string.verifyingQR));
+                String r = result.getContents();
+                /*Intent intent = new Intent();
+                intent.putExtra("RESULT", r);*/
+                ParseResult(r);
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PermissionHelper.SYSTEM_PERMISSION_REQ) {
+            turnOnHotspot();
+        } else if (requestCode == PermissionHelper.APP_SETTINGS_REQ) {
+            turnOnHotspot();
+        } else if (requestCode == PermissionHelper.STORAGE_SETTINGS) {
+            checkStoragePermission();
+        }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(receiver, intentFilter);
-    }*/
-
+    private void checkStoragePermission() {
+        if (!PermissionHelper.checkStorage(this)) {
+            PermissionHelper.storage(this);
+        }
+    }
 
 }

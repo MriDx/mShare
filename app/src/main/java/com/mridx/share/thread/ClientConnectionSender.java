@@ -1,5 +1,7 @@
 package com.mridx.share.thread;
 
+import android.util.Log;
+
 import com.mridx.share.thread.callback.OnConnectionEst;
 
 import java.io.BufferedOutputStream;
@@ -29,6 +31,7 @@ public class ClientConnectionSender extends Thread {
     public void run() {
         super.run();
         if (socket != null) {
+            Log.e("kaku", "run: ahisi kela bal t");
             try {
                 BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
                 DataOutputStream dos = new DataOutputStream(bos);

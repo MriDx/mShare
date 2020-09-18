@@ -1,5 +1,7 @@
 package com.mridx.share.thread;
 
+import android.util.Log;
+
 import com.mridx.share.thread.callback.OnConnectionReceived;
 
 import java.io.BufferedInputStream;
@@ -30,10 +32,12 @@ public class ConnectionRetriever extends Thread {
             try {
                 do {
                     client = serverSocket.accept();
+                    Log.d("kaku", "run: " + client.getInetAddress().getHostAddress());
                     if (client.getInputStream() != null) {
                         BufferedInputStream bufferedInputStream = new BufferedInputStream(client.getInputStream());
                         DataInputStream dataInputStream = new DataInputStream(bufferedInputStream);
                         String clientIp = dataInputStream.readUTF(); //read ip
+                        clientIp = client.getInetAddress().getHostAddress();
                         int clientPort = dataInputStream.readInt(); //read port
                         onConnectionReceived.onReceived(true, clientIp, clientPort);
                         client.close();

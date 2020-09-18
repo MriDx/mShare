@@ -26,7 +26,7 @@ class FileReceiver(private val type: Utils.TYPE) : Thread() {
                 ServerSocket(Utils.CLIENT_PORT)
             }
 
-            while (true) {
+            do {
                 client = serverSocket.accept()
                 receiverCallback?.onConnected(true, null)
 
@@ -36,7 +36,19 @@ class FileReceiver(private val type: Utils.TYPE) : Thread() {
 
                 receiverThread.onProgress = this::onProgress
                 receiverThread.onComplete = this::onComplete
-            }
+            } while (true)
+
+            /*while (true) {
+                client = serverSocket.accept()
+                receiverCallback?.onConnected(true, null)
+
+                //start file saving thread
+                val receiverThread = ReceiverThread(client)
+                receiverThread.start()
+
+                receiverThread.onProgress = this::onProgress
+                receiverThread.onComplete = this::onComplete
+            }*/
         } catch (e: IOException) {
             e.printStackTrace()
             receiverCallback?.onConnected(false, e)

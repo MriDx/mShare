@@ -198,6 +198,7 @@ public class CreateUI extends AppCompatActivity {
             ConnectionRetriever connectionRetriever = new ConnectionRetriever(serverSocket);
             connectionRetriever.start();
             connectionRetriever.setOnConnectionReceived(this::onConnectionReceived);
+            Toast.makeText(this, "Server created at port no. - " + serverSocket.getLocalPort(), Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Server socket failed to create", Toast.LENGTH_SHORT).show();
@@ -206,7 +207,7 @@ public class CreateUI extends AppCompatActivity {
 
     private void onConnectionReceived(boolean b, String s, int i) {
         if (!b) {
-            // TODO: 10/09/20 failed
+            this.runOnUiThread(() -> Toast.makeText(this, "Connection failed", Toast.LENGTH_SHORT).show());
             return;
         }
         Utils.CLIENT_IP = s;
@@ -281,5 +282,6 @@ public class CreateUI extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         qrViewer = null;
+        Util.getInstance().stopServer();
     }
 }
